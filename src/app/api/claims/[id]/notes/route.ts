@@ -3,10 +3,11 @@ import { getClaimNotes, createClaimNote } from '@/lib/db'
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const notes = await getClaimNotes(params.id)
+    const { id } = await params
+    const notes = await getClaimNotes(id)
     return NextResponse.json(notes)
   } catch (error) {
     console.error('Error in GET /api/claims/[id]/notes:', error)
@@ -16,9 +17,10 @@ export async function GET(
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const body = await request.json()
     const { author_id, note } = body
 
@@ -27,7 +29,7 @@ export async function POST(
     }
 
     const newNote = await createClaimNote({
-      claim_id: params.id,
+      claim_id: id,
       author_id,
       note: note.trim(),
     })

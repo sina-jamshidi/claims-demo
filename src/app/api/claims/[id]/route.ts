@@ -3,10 +3,11 @@ import { getClaimById, updateClaimStatus } from '@/lib/db'
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const claim = await getClaimById(params.id)
+    const { id } = await params
+    const claim = await getClaimById(id)
     
     if (!claim) {
       return NextResponse.json({ error: 'Claim not found' }, { status: 404 })
@@ -21,9 +22,10 @@ export async function GET(
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const body = await request.json()
     const { status } = body
 
@@ -31,7 +33,7 @@ export async function PATCH(
       return NextResponse.json({ error: 'Invalid status' }, { status: 400 })
     }
 
-    const success = await updateClaimStatus(params.id, status)
+    const success = await updateClaimStatus(id, status)
     
     if (!success) {
       return NextResponse.json({ error: 'Failed to update claim' }, { status: 500 })
